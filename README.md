@@ -10,8 +10,8 @@ from nitro_datastore import NitroDataStore
 # Create from a dictionary
 data = NitroDataStore({
     'site': {
-        'name': 'My Awesome Site',
-        'url': 'https://example.com'
+        'name': 'Nitro',
+        'url': 'https://nitro.sh'
     }
 })
 
