@@ -4,11 +4,11 @@ import json
 from pathlib import Path
 from typing import Any, Callable, Dict, Iterator, List, Optional, Union
 
-_GLOB_DOUBLE_WILDCARD_PLACEHOLDER = '___DOUBLE_WILDCARD___'
-_GLOB_DOUBLE_WILDCARD_PATTERN = '**'
-_GLOB_SINGLE_WILDCARD_PATTERN = '*'
-_REGEX_DOUBLE_WILDCARD = r'.*'
-_REGEX_SINGLE_WILDCARD = r'[^.]+'
+_GLOB_DOUBLE_WILDCARD_PLACEHOLDER = "___DOUBLE_WILDCARD___"
+_GLOB_DOUBLE_WILDCARD_PATTERN = "**"
+_GLOB_SINGLE_WILDCARD_PATTERN = "*"
+_REGEX_DOUBLE_WILDCARD = r".*"
+_REGEX_SINGLE_WILDCARD = r"[^.]+"
 
 
 class NitroDataStore:
@@ -50,7 +50,12 @@ class NitroDataStore:
         self._paths_cache: Dict[tuple, List[str]] = {}
 
     @classmethod
-    def from_file(cls, file_path: Union[str, Path], base_dir: Optional[Union[str, Path]] = None, max_size: Optional[int] = None) -> "NitroDataStore":
+    def from_file(
+        cls,
+        file_path: Union[str, Path],
+        base_dir: Optional[Union[str, Path]] = None,
+        max_size: Optional[int] = None,
+    ) -> "NitroDataStore":
         """Load data from a JSON file.
 
         Args:
@@ -113,13 +118,19 @@ class NitroDataStore:
                     f"File size ({size_mb:.2f} MB) exceeds maximum allowed size ({limit_mb:.2f} MB)"
                 )
 
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
         return cls(data)
 
     @classmethod
-    def from_directory(cls, directory: Union[str, Path], pattern: str = "*.json", base_dir: Optional[Union[str, Path]] = None, max_size: Optional[int] = None) -> "NitroDataStore":
+    def from_directory(
+        cls,
+        directory: Union[str, Path],
+        pattern: str = "*.json",
+        base_dir: Optional[Union[str, Path]] = None,
+        max_size: Optional[int] = None,
+    ) -> "NitroDataStore":
         """Load and merge all JSON files from a directory.
 
         Files are merged in alphabetical order. Later files override earlier ones.
@@ -198,7 +209,7 @@ class NitroDataStore:
                             f"File size ({size_mb:.2f} MB) exceeds maximum allowed size ({limit_mb:.2f} MB) for file: {file_path}"
                         )
 
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     file_data = json.load(f)
                     merged_data = cls._deep_merge(merged_data, file_data)
             except (json.JSONDecodeError, IOError):
@@ -233,10 +244,10 @@ class NitroDataStore:
         """
         self._validate_path(key)
 
-        if '.' not in key:
+        if "." not in key:
             return self._data.get(key, default)
 
-        keys = key.split('.')
+        keys = key.split(".")
         value = self._data
 
         for k in keys:
@@ -267,12 +278,12 @@ class NitroDataStore:
         """
         self._validate_path(key)
 
-        if '.' not in key:
+        if "." not in key:
             self._data[key] = value
             self._invalidate_cache()
             return
 
-        keys = key.split('.')
+        keys = key.split(".")
         current = self._data
 
         # Navigate to the parent of the final key
@@ -309,14 +320,14 @@ class NitroDataStore:
         """
         self._validate_path(key)
 
-        if '.' not in key:
+        if "." not in key:
             if key in self._data:
                 del self._data[key]
                 self._invalidate_cache()
                 return True
             return False
 
-        keys = key.split('.')
+        keys = key.split(".")
         current = self._data
 
         # Navigate to the parent of the final key
@@ -347,10 +358,10 @@ class NitroDataStore:
         """
         self._validate_path(key)
 
-        if '.' not in key:
+        if "." not in key:
             return key in self._data
 
-        keys = key.split('.')
+        keys = key.split(".")
         value = self._data
 
         for k in keys:
@@ -393,7 +404,7 @@ class NitroDataStore:
         path = Path(file_path)
         path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(path, 'w', encoding='utf-8') as f:
+        with open(path, "w", encoding="utf-8") as f:
             json.dump(self._data, f, indent=indent, ensure_ascii=False)
 
     def keys(self) -> Iterator[str]:
@@ -420,7 +431,7 @@ class NitroDataStore:
         """
         return iter(self._data.items())
 
-    def flatten(self, separator: str = '.') -> Dict[str, Any]:
+    def flatten(self, separator: str = ".") -> Dict[str, Any]:
         """Flatten nested dictionary to dot-notation keys.
 
         Args:
@@ -435,7 +446,7 @@ class NitroDataStore:
             {'site.name': 'My Site', 'site.settings.theme': 'dark'}
         """
 
-        def _flatten_dict(d: Dict[str, Any], parent_key: str = '') -> Dict[str, Any]:
+        def _flatten_dict(d: Dict[str, Any], parent_key: str = "") -> Dict[str, Any]:
             items: List[tuple] = []
             for k, v in d.items():
                 new_key = f"{parent_key}{separator}{k}" if parent_key else k
@@ -447,7 +458,7 @@ class NitroDataStore:
 
         return _flatten_dict(self._data)
 
-    def list_paths(self, prefix: str = '', separator: str = '.') -> List[str]:
+    def list_paths(self, prefix: str = "", separator: str = ".") -> List[str]:
         """List all paths in the data structure.
 
         Args:
@@ -472,15 +483,19 @@ class NitroDataStore:
 
         paths = []
 
-        def _collect_paths(obj: Any, current_path: str = '') -> None:
+        def _collect_paths(obj: Any, current_path: str = "") -> None:
             if isinstance(obj, dict):
                 for key, value in obj.items():
-                    new_path = f"{current_path}{separator}{key}" if current_path else key
+                    new_path = (
+                        f"{current_path}{separator}{key}" if current_path else key
+                    )
                     paths.append(new_path)
                     _collect_paths(value, new_path)
             elif isinstance(obj, list):
                 for idx, item in enumerate(obj):
-                    new_path = f"{current_path}{separator}{idx}" if current_path else str(idx)
+                    new_path = (
+                        f"{current_path}{separator}{idx}" if current_path else str(idx)
+                    )
                     paths.append(new_path)
                     _collect_paths(item, new_path)
 
@@ -494,7 +509,7 @@ class NitroDataStore:
         self._paths_cache[cache_key] = paths.copy()
         return paths
 
-    def find_paths(self, pattern: str, separator: str = '.') -> List[str]:
+    def find_paths(self, pattern: str, separator: str = ".") -> List[str]:
         """Find paths matching a glob-like pattern.
 
         Supports wildcards:
@@ -517,20 +532,17 @@ class NitroDataStore:
 
         all_paths = self.list_paths(separator=separator)
 
-        regex_pattern = pattern.replace('.', r'\.')
+        regex_pattern = pattern.replace(".", r"\.")
         regex_pattern = regex_pattern.replace(
-            _GLOB_DOUBLE_WILDCARD_PATTERN,
-            _GLOB_DOUBLE_WILDCARD_PLACEHOLDER
+            _GLOB_DOUBLE_WILDCARD_PATTERN, _GLOB_DOUBLE_WILDCARD_PLACEHOLDER
         )
         regex_pattern = regex_pattern.replace(
-            _GLOB_SINGLE_WILDCARD_PATTERN,
-            _REGEX_SINGLE_WILDCARD
+            _GLOB_SINGLE_WILDCARD_PATTERN, _REGEX_SINGLE_WILDCARD
         )
         regex_pattern = regex_pattern.replace(
-            _GLOB_DOUBLE_WILDCARD_PLACEHOLDER,
-            _REGEX_DOUBLE_WILDCARD
+            _GLOB_DOUBLE_WILDCARD_PLACEHOLDER, _REGEX_DOUBLE_WILDCARD
         )
-        regex_pattern = f'^{regex_pattern}$'
+        regex_pattern = f"^{regex_pattern}$"
 
         regex = re.compile(regex_pattern)
         return [p for p in all_paths if regex.match(p)]
@@ -567,7 +579,7 @@ class NitroDataStore:
         """
         results = {}
 
-        def _search(obj: Any, current_path: str = '') -> None:
+        def _search(obj: Any, current_path: str = "") -> None:
             if isinstance(obj, dict):
                 for k, v in obj.items():
                     new_path = f"{current_path}.{k}" if current_path else k
@@ -598,7 +610,7 @@ class NitroDataStore:
         """
         results = {}
 
-        def _search(obj: Any, current_path: str = '') -> None:
+        def _search(obj: Any, current_path: str = "") -> None:
             if isinstance(obj, dict):
                 for k, v in obj.items():
                     new_path = f"{current_path}.{k}" if current_path else k
@@ -615,7 +627,9 @@ class NitroDataStore:
         _search(self._data)
         return results
 
-    def update_where(self, condition: Callable[[str, Any], bool], transform: Callable[[Any], Any]) -> int:
+    def update_where(
+        self, condition: Callable[[str, Any], bool], transform: Callable[[Any], Any]
+    ) -> int:
         """Update all values matching a condition.
 
         Args:
@@ -634,7 +648,7 @@ class NitroDataStore:
         """
         count = 0
 
-        def _update(obj: Any, current_path: str = '') -> Any:
+        def _update(obj: Any, current_path: str = "") -> Any:
             nonlocal count
             if isinstance(obj, dict):
                 result = {}
@@ -764,25 +778,25 @@ class NitroDataStore:
         def _describe_value(obj: Any) -> Dict[str, Any]:
             if isinstance(obj, dict):
                 return {
-                    'type': 'dict',
-                    'keys': list(obj.keys()),
-                    'structure': {k: _describe_value(v) for k, v in obj.items()}
+                    "type": "dict",
+                    "keys": list(obj.keys()),
+                    "structure": {k: _describe_value(v) for k, v in obj.items()},
                 }
             elif isinstance(obj, list):
                 item_types = list(set(type(item).__name__ for item in obj))
-                return {
-                    'type': 'list',
-                    'length': len(obj),
-                    'item_types': item_types
-                }
+                return {"type": "list", "length": len(obj), "item_types": item_types}
             else:
                 return {
-                    'type': type(obj).__name__,
-                    'value': obj if not isinstance(obj, (str, int, float, bool)) or len(
-                        str(obj)) < 50 else f"{str(obj)[:47]}..."
+                    "type": type(obj).__name__,
+                    "value": (
+                        obj
+                        if not isinstance(obj, (str, int, float, bool))
+                        or len(str(obj)) < 50
+                        else f"{str(obj)[:47]}..."
+                    ),
                 }
 
-        return _describe_value(self._data).get('structure', {})
+        return _describe_value(self._data).get("structure", {})
 
     def stats(self) -> Dict[str, int]:
         """Get statistics about the data structure.
@@ -796,32 +810,32 @@ class NitroDataStore:
             {'total_keys': 3, 'max_depth': 3, 'total_dicts': 3, 'total_lists': 0, 'total_values': 1}
         """
         stats = {
-            'total_keys': 0,
-            'max_depth': 0,
-            'total_dicts': 0,
-            'total_lists': 0,
-            'total_values': 0
+            "total_keys": 0,
+            "max_depth": 0,
+            "total_dicts": 0,
+            "total_lists": 0,
+            "total_values": 0,
         }
 
         def _analyze(obj: Any, depth: int = 0) -> None:
-            stats['max_depth'] = max(stats['max_depth'], depth)
+            stats["max_depth"] = max(stats["max_depth"], depth)
 
             if isinstance(obj, dict):
-                stats['total_dicts'] += 1
-                stats['total_keys'] += len(obj)
+                stats["total_dicts"] += 1
+                stats["total_keys"] += len(obj)
                 for v in obj.values():
                     _analyze(v, depth + 1)
             elif isinstance(obj, list):
-                stats['total_lists'] += 1
+                stats["total_lists"] += 1
                 for item in obj:
                     _analyze(item, depth + 1)
             else:
-                stats['total_values'] += 1
+                stats["total_values"] += 1
 
         _analyze(self._data)
         return stats
 
-    def query(self, path: str) -> 'QueryBuilder':
+    def query(self, path: str) -> "QueryBuilder":
         """Start a query builder for filtering and transforming data.
 
         Args:
@@ -835,10 +849,11 @@ class NitroDataStore:
             >>> results = data.query('posts').where(lambda x: x.get('published')).execute()
         """
         from nitro_datastore.query_builder import QueryBuilder
+
         value = self.get(path)
         return QueryBuilder(value if isinstance(value, list) else [])
 
-    def transform_all(self, transform: Callable[[str, Any], Any]) -> 'NitroDataStore':
+    def transform_all(self, transform: Callable[[str, Any], Any]) -> "NitroDataStore":
         """Create a new datastore with all values transformed.
 
         Args:
@@ -854,19 +869,25 @@ class NitroDataStore:
             'TEST'
         """
 
-        def _transform(obj: Any, current_path: str = '') -> Any:
+        def _transform(obj: Any, current_path: str = "") -> Any:
             if isinstance(obj, dict):
-                return {k: _transform(v, f"{current_path}.{k}" if current_path else k)
-                        for k, v in obj.items()}
+                return {
+                    k: _transform(v, f"{current_path}.{k}" if current_path else k)
+                    for k, v in obj.items()
+                }
             elif isinstance(obj, list):
-                return [_transform(item, f"{current_path}.{idx}" if current_path else str(idx))
-                        for idx, item in enumerate(obj)]
+                return [
+                    _transform(
+                        item, f"{current_path}.{idx}" if current_path else str(idx)
+                    )
+                    for idx, item in enumerate(obj)
+                ]
             else:
                 return transform(current_path, obj)
 
         return NitroDataStore(_transform(self._data))
 
-    def transform_keys(self, transform: Callable[[str], str]) -> 'NitroDataStore':
+    def transform_keys(self, transform: Callable[[str], str]) -> "NitroDataStore":
         """Create a new datastore with all keys transformed.
 
         Args:
@@ -892,7 +913,7 @@ class NitroDataStore:
 
         return NitroDataStore(_transform(self._data))
 
-    def diff(self, other: Union['NitroDataStore', Dict[str, Any]]) -> Dict[str, Any]:
+    def diff(self, other: Union["NitroDataStore", Dict[str, Any]]) -> Dict[str, Any]:
         """Compare this datastore with another and return differences.
 
         Args:
@@ -936,15 +957,11 @@ class NitroDataStore:
             self_val = self.get(path)
             other_val = NitroDataStore(other_data).get(path)
             if self_val != other_val:
-                changed[path] = {'old': self_val, 'new': other_val}
+                changed[path] = {"old": self_val, "new": other_val}
 
-        return {
-            'added': added,
-            'removed': removed,
-            'changed': changed
-        }
+        return {"added": added, "removed": removed, "changed": changed}
 
-    def equals(self, other: Union['NitroDataStore', Dict[str, Any]]) -> bool:
+    def equals(self, other: Union["NitroDataStore", Dict[str, Any]]) -> bool:
         """Check if this datastore is equal to another.
 
         Args:
@@ -1030,9 +1047,11 @@ class NitroDataStore:
 
     def __getattr__(self, name: str) -> Any:
         """Dot notation access: data.key"""
-        if name.startswith('_'):
+        if name.startswith("_"):
             # Allow access to private attributes
-            raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+            raise AttributeError(
+                f"'{type(self).__name__}' object has no attribute '{name}'"
+            )
 
         if name in self._data:
             result = self._data[name]
@@ -1045,7 +1064,7 @@ class NitroDataStore:
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Dot notation assignment: data.key = value"""
-        if name.startswith('_'):
+        if name.startswith("_"):
             # Allow setting private attributes normally
             super().__setattr__(name, value)
         else:
@@ -1068,11 +1087,11 @@ class NitroDataStore:
         """Human-readable string"""
         return json.dumps(self._data, indent=2, ensure_ascii=False)
 
-    def __copy__(self) -> 'NitroDataStore':
+    def __copy__(self) -> "NitroDataStore":
         """Shallow copy support for copy.copy()"""
         return NitroDataStore(self._data.copy())
 
-    def __deepcopy__(self, memo: Dict[int, Any]) -> 'NitroDataStore':
+    def __deepcopy__(self, memo: Dict[int, Any]) -> "NitroDataStore":
         """Deep copy support for copy.deepcopy()"""
         return NitroDataStore(self._deep_copy(self._data))
 
@@ -1102,8 +1121,8 @@ class NitroDataStore:
         if not path or not path.strip():
             raise ValueError("Path cannot be empty or whitespace-only")
 
-        if '.' in path:
-            segments = path.split('.')
+        if "." in path:
+            segments = path.split(".")
             for segment in segments:
                 if not segment or not segment.strip():
                     raise ValueError(
@@ -1112,7 +1131,11 @@ class NitroDataStore:
                     )
 
     @staticmethod
-    def _deep_merge(base: Dict[str, Any], overlay: Dict[str, Any], seen: Optional[Dict[int, Any]] = None) -> Dict[str, Any]:
+    def _deep_merge(
+        base: Dict[str, Any],
+        overlay: Dict[str, Any],
+        seen: Optional[Dict[int, Any]] = None,
+    ) -> Dict[str, Any]:
         """
         Deep merge two dictionaries with circular reference protection.
 
@@ -1133,7 +1156,9 @@ class NitroDataStore:
         base_id = id(base)
 
         if base_id in seen:
-            raise ValueError("Circular reference detected in base dictionary during deep merge")
+            raise ValueError(
+                "Circular reference detected in base dictionary during deep merge"
+            )
 
         seen[base_id] = True
 
@@ -1141,7 +1166,11 @@ class NitroDataStore:
             result = base.copy()
 
             for key, value in overlay.items():
-                if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                if (
+                    key in result
+                    and isinstance(result[key], dict)
+                    and isinstance(value, dict)
+                ):
                     result[key] = NitroDataStore._deep_merge(result[key], value, seen)
                 else:
                     result[key] = value
@@ -1181,7 +1210,9 @@ class NitroDataStore:
 
             try:
                 if isinstance(obj, dict):
-                    result = {k: NitroDataStore._deep_copy(v, seen) for k, v in obj.items()}
+                    result = {
+                        k: NitroDataStore._deep_copy(v, seen) for k, v in obj.items()
+                    }
                 else:
                     result = [NitroDataStore._deep_copy(item, seen) for item in obj]
 

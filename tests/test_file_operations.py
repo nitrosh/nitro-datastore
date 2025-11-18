@@ -11,7 +11,7 @@ class TestNitroDataStoreFileOperations:
 
     def test_from_file_valid(self, tmp_path):
         """Test loading from a valid JSON file."""
-        test_data = {'site': {'name': 'Test Site', 'version': 1}}
+        test_data = {"site": {"name": "Test Site", "version": 1}}
         json_file = tmp_path / "data.json"
         json_file.write_text(json.dumps(test_data))
 
@@ -36,7 +36,7 @@ class TestNitroDataStoreFileOperations:
         data_dir = tmp_path / "data"
         data_dir.mkdir()
 
-        test_data = {'site': {'name': 'Site 1'}}
+        test_data = {"site": {"name": "Site 1"}}
         (data_dir / "data1.json").write_text(json.dumps(test_data))
 
         data = NitroDataStore.from_directory(data_dir)
@@ -47,15 +47,19 @@ class TestNitroDataStoreFileOperations:
         data_dir = tmp_path / "data"
         data_dir.mkdir()
 
-        (data_dir / "a.json").write_text(json.dumps({'site': {'name': 'Site A', 'url': 'a.com'}}))
-        (data_dir / "b.json").write_text(json.dumps({'site': {'name': 'Site B'}, 'extra': 'data'}))
+        (data_dir / "a.json").write_text(
+            json.dumps({"site": {"name": "Site A", "url": "a.com"}})
+        )
+        (data_dir / "b.json").write_text(
+            json.dumps({"site": {"name": "Site B"}, "extra": "data"})
+        )
 
         data = NitroDataStore.from_directory(data_dir)
         result = data.to_dict()
 
-        assert result['site']['name'] == 'Site B'
-        assert result['site']['url'] == 'a.com'
-        assert result['extra'] == 'data'
+        assert result["site"]["name"] == "Site B"
+        assert result["site"]["url"] == "a.com"
+        assert result["extra"] == "data"
 
     def test_from_directory_not_found(self):
         """Test loading from non-existent directory."""
@@ -67,27 +71,27 @@ class TestNitroDataStoreFileOperations:
         data_dir = tmp_path / "data"
         data_dir.mkdir()
 
-        (data_dir / "valid.json").write_text(json.dumps({'valid': 'data'}))
+        (data_dir / "valid.json").write_text(json.dumps({"valid": "data"}))
         (data_dir / "invalid.json").write_text("{ invalid }")
 
         data = NitroDataStore.from_directory(data_dir)
-        assert data.to_dict() == {'valid': 'data'}
+        assert data.to_dict() == {"valid": "data"}
 
     def test_from_directory_custom_pattern(self, tmp_path):
         """Test loading from directory with custom pattern."""
         data_dir = tmp_path / "data"
         data_dir.mkdir()
 
-        (data_dir / "config.json").write_text(json.dumps({'config': 'data'}))
-        (data_dir / "data.txt").write_text(json.dumps({'txt': 'data'}))
+        (data_dir / "config.json").write_text(json.dumps({"config": "data"}))
+        (data_dir / "data.txt").write_text(json.dumps({"txt": "data"}))
 
         data = NitroDataStore.from_directory(data_dir, pattern="*.json")
-        assert 'config' in data.to_dict()
-        assert 'txt' not in data.to_dict()
+        assert "config" in data.to_dict()
+        assert "txt" not in data.to_dict()
 
     def test_save(self, tmp_path):
         """Test saving data to file."""
-        data = NitroDataStore({'site': {'name': 'My Site'}})
+        data = NitroDataStore({"site": {"name": "My Site"}})
         output_file = tmp_path / "output.json"
 
         data.save(output_file)
@@ -95,11 +99,11 @@ class TestNitroDataStoreFileOperations:
         assert output_file.exists()
         with open(output_file) as f:
             saved_data = json.load(f)
-        assert saved_data == {'site': {'name': 'My Site'}}
+        assert saved_data == {"site": {"name": "My Site"}}
 
     def test_save_creates_parent_dirs(self, tmp_path):
         """Test that save creates parent directories."""
-        data = NitroDataStore({'test': 'data'})
+        data = NitroDataStore({"test": "data"})
         output_file = tmp_path / "nested" / "dirs" / "output.json"
 
         data.save(output_file)
@@ -109,7 +113,7 @@ class TestNitroDataStoreFileOperations:
 
     def test_save_custom_indent(self, tmp_path):
         """Test saving with custom indentation."""
-        data = NitroDataStore({'site': {'name': 'Test'}})
+        data = NitroDataStore({"site": {"name": "Test"}})
         output_file = tmp_path / "output.json"
 
         data.save(output_file, indent=4)

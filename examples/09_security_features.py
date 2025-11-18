@@ -17,23 +17,25 @@ from nitro_datastore import NitroDataStore
 def section(title):
     print(f"\n{'='*70}")
     print(f"  {title}")
-    print('='*70)
+    print("=" * 70)
 
 
 def demo_path_traversal_protection():
     section("1. Path Traversal Protection")
 
     print("\nProtects against directory traversal attacks when loading files.")
-    print("Use the 'base_dir' parameter to restrict file access to a specific directory.")
+    print(
+        "Use the 'base_dir' parameter to restrict file access to a specific directory."
+    )
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        safe_dir = Path(tmpdir) / 'safe'
+        safe_dir = Path(tmpdir) / "safe"
         safe_dir.mkdir()
-        unsafe_dir = Path(tmpdir) / 'unsafe'
+        unsafe_dir = Path(tmpdir) / "unsafe"
         unsafe_dir.mkdir()
 
-        (safe_dir / 'config.json').write_text('{"allowed": true}')
-        (unsafe_dir / 'secrets.json').write_text('{"secret": "password123"}')
+        (safe_dir / "config.json").write_text('{"allowed": true}')
+        (unsafe_dir / "secrets.json").write_text('{"secret": "password123"}')
 
         print(f"\nDirectory structure:")
         print(f"  {tmpdir}/")
@@ -43,19 +45,19 @@ def demo_path_traversal_protection():
         print(f"      secrets.json")
 
         print("\n✓ Loading file within base_dir (ALLOWED):")
-        data = NitroDataStore.from_file(safe_dir / 'config.json', base_dir=safe_dir)
+        data = NitroDataStore.from_file(safe_dir / "config.json", base_dir=safe_dir)
         print(f"  Loaded: {data.to_dict()}")
 
         print("\n✗ Attempting to load file outside base_dir (BLOCKED):")
         try:
-            evil_path = safe_dir / '..' / 'unsafe' / 'secrets.json'
+            evil_path = safe_dir / ".." / "unsafe" / "secrets.json"
             data = NitroDataStore.from_file(evil_path, base_dir=safe_dir)
             print(f"  ERROR: Should have been blocked!")
         except ValueError as e:
             print(f"  Blocked: {e}")
 
         print("\n✓ Loading without base_dir (backward compatible):")
-        data = NitroDataStore.from_file(unsafe_dir / 'secrets.json')
+        data = NitroDataStore.from_file(unsafe_dir / "secrets.json")
         print(f"  Loaded: {data.to_dict()}")
         print(f"  Note: Only use without base_dir for trusted paths")
 
@@ -69,10 +71,10 @@ def demo_file_size_limits():
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
 
-        small_file = tmpdir / 'small.json'
+        small_file = tmpdir / "small.json"
         small_file.write_text('{"size": "small"}')
 
-        large_file = tmpdir / 'large.json'
+        large_file = tmpdir / "large.json"
         large_data = {"data": "x" * 100000}
         large_file.write_text(json.dumps(large_data))
 
@@ -84,12 +86,12 @@ def demo_file_size_limits():
         print(f"  large.json: {large_size} bytes")
 
         print(f"\n✓ Loading small file with 10KB limit (ALLOWED):")
-        data = NitroDataStore.from_file(small_file, max_size=10*1024)
+        data = NitroDataStore.from_file(small_file, max_size=10 * 1024)
         print(f"  Loaded successfully")
 
         print(f"\n✗ Attempting to load large file with 10KB limit (BLOCKED):")
         try:
-            data = NitroDataStore.from_file(large_file, max_size=10*1024)
+            data = NitroDataStore.from_file(large_file, max_size=10 * 1024)
             print(f"  ERROR: Should have been blocked!")
         except ValueError as e:
             print(f"  Blocked: {e}")
@@ -106,10 +108,10 @@ def demo_path_validation():
     print("\nValidates path strings in path-based methods (get, set, delete, has).")
     print("Rejects malformed paths that could cause errors or unexpected behavior.")
 
-    data = NitroDataStore({'user': {'name': 'Alice', 'age': 30}})
+    data = NitroDataStore({"user": {"name": "Alice", "age": 30}})
 
     print("\n✓ Valid paths (ALLOWED):")
-    valid_paths = ['user', 'user.name', 'user.age', 'config.theme.color']
+    valid_paths = ["user", "user.name", "user.age", "config.theme.color"]
     for path in valid_paths:
         try:
             result = data.has(path)
@@ -119,13 +121,13 @@ def demo_path_validation():
 
     print("\n✗ Invalid paths (REJECTED):")
     invalid_paths = [
-        ('', 'empty string'),
-        ('   ', 'whitespace only'),
-        ('.', 'single dot'),
-        ('..', 'double dots'),
-        ('.foo', 'leading dot'),
-        ('foo.', 'trailing dot'),
-        ('foo..bar', 'consecutive dots')
+        ("", "empty string"),
+        ("   ", "whitespace only"),
+        (".", "single dot"),
+        ("..", "double dots"),
+        (".foo", "leading dot"),
+        ("foo.", "trailing dot"),
+        ("foo..bar", "consecutive dots"),
     ]
 
     for path, description in invalid_paths:
@@ -148,23 +150,15 @@ def demo_circular_reference_protection():
     print("Applied during deep copy, merge, and serialization operations.")
 
     print("\n✓ Normal nested structures (ALLOWED):")
-    normal_data = {
-        'level1': {
-            'level2': {
-                'level3': {
-                    'value': 'deep'
-                }
-            }
-        }
-    }
+    normal_data = {"level1": {"level2": {"level3": {"value": "deep"}}}}
     data = NitroDataStore(normal_data)
     copied = data.to_dict()
     print(f"  Successfully copied nested structure")
     print(f"  Depth: 4 levels")
 
     print("\n✗ Circular reference in dict (DETECTED):")
-    circular_dict = {'a': 1}
-    circular_dict['self'] = circular_dict
+    circular_dict = {"a": 1}
+    circular_dict["self"] = circular_dict
 
     try:
         data = NitroDataStore(circular_dict)
@@ -184,9 +178,9 @@ def demo_circular_reference_protection():
         print(f"  Detected: {e}")
 
     print("\n✗ Circular reference during merge (DETECTED):")
-    data = NitroDataStore({'config': {}})
-    data._data['config']['self'] = data._data['config']
-    overlay = {'config': {'self': {'new': 'value'}}}
+    data = NitroDataStore({"config": {}})
+    data._data["config"]["self"] = data._data["config"]
+    overlay = {"config": {"self": {"new": "value"}}}
 
     try:
         data.merge(overlay)
@@ -206,30 +200,28 @@ def demo_combined_protections():
     print("\nSecurity features can be combined for defense in depth.")
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        safe_dir = Path(tmpdir) / 'data'
+        safe_dir = Path(tmpdir) / "data"
         safe_dir.mkdir()
 
-        config_file = safe_dir / 'config.json'
+        config_file = safe_dir / "config.json"
         config_file.write_text('{"app": "secure", "version": "1.0"}')
 
         print(f"\n✓ Loading with both path and size protections:")
         data = NitroDataStore.from_file(
-            config_file,
-            base_dir=safe_dir,
-            max_size=1024*1024
+            config_file, base_dir=safe_dir, max_size=1024 * 1024
         )
         print(f"  Loaded: {data.to_dict()}")
         print(f"  - Path validated against base_dir")
         print(f"  - Size checked against max_size")
 
         print(f"\n✓ All operations validate paths:")
-        data.set('app.name', 'SecureApp')
+        data.set("app.name", "SecureApp")
         print(f"  set() validated path: 'app.name'")
 
-        value = data.get('app.name', 'default')
+        value = data.get("app.name", "default")
         print(f"  get() validated path: 'app.name' -> '{value}'")
 
-        exists = data.has('app.version')
+        exists = data.has("app.version")
         print(f"  has() validated path: 'app.version' -> {exists}")
 
 
@@ -269,13 +261,15 @@ def demo_security_best_practices():
 
 
 def main():
-    print("""
+    print(
+        """
 ╔══════════════════════════════════════════════════════════════════════╗
 ║                    NitroDataStore Security Features                  ║
 ║                                                                      ║
 ║  Comprehensive security protections for safe data operations        ║
 ╚══════════════════════════════════════════════════════════════════════╝
-""")
+"""
+    )
 
     demo_path_traversal_protection()
     demo_file_size_limits()
@@ -286,8 +280,8 @@ def main():
 
     print(f"\n{'='*70}")
     print("Security features demonstration complete!")
-    print('='*70)
+    print("=" * 70)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

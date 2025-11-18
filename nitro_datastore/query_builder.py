@@ -28,7 +28,7 @@ class QueryBuilder:
         self._limit_count: Optional[int] = None
         self._offset_count: int = 0
 
-    def where(self, predicate: Callable[[Any], bool]) -> 'QueryBuilder':
+    def where(self, predicate: Callable[[Any], bool]) -> "QueryBuilder":
         """Add a filter condition.
 
         Args:
@@ -43,7 +43,9 @@ class QueryBuilder:
         self._filters.append(predicate)
         return self
 
-    def sort(self, key: Optional[Callable[[Any], Any]] = None, reverse: bool = False) -> 'QueryBuilder':
+    def sort(
+        self, key: Optional[Callable[[Any], Any]] = None, reverse: bool = False
+    ) -> "QueryBuilder":
         """Sort the results.
 
         Args:
@@ -60,7 +62,7 @@ class QueryBuilder:
         self._sort_reverse = reverse
         return self
 
-    def limit(self, count: int) -> 'QueryBuilder':
+    def limit(self, count: int) -> "QueryBuilder":
         """Limit the number of results.
 
         Args:
@@ -75,7 +77,7 @@ class QueryBuilder:
         self._limit_count = count
         return self
 
-    def offset(self, count: int) -> 'QueryBuilder':
+    def offset(self, count: int) -> "QueryBuilder":
         """Skip a number of results.
 
         Args:
@@ -111,11 +113,11 @@ class QueryBuilder:
 
         # Apply offset
         if self._offset_count > 0:
-            result = result[self._offset_count:]
+            result = result[self._offset_count :]
 
         # Apply limit
         if self._limit_count is not None:
-            result = result[:self._limit_count]
+            result = result[: self._limit_count]
 
         return result
 

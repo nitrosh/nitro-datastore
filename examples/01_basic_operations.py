@@ -23,17 +23,16 @@ print("\n1. Creating a DataStore")
 print("-" * 70)
 
 # Create from dictionary
-data = NitroDataStore({
-    'site': {
-        'name': 'My Awesome Site',
-        'url': 'https://example.com',
-        'author': 'John Doe'
-    },
-    'settings': {
-        'theme': 'dark',
-        'language': 'en'
+data = NitroDataStore(
+    {
+        "site": {
+            "name": "My Awesome Site",
+            "url": "https://example.com",
+            "author": "John Doe",
+        },
+        "settings": {"theme": "dark", "language": "en"},
     }
-})
+)
 
 print("Created datastore with site and settings data")
 
@@ -59,19 +58,19 @@ print("\n3. Setting Values")
 print("-" * 70)
 
 # Simple set
-data.set('site.title', 'Welcome!')
+data.set("site.title", "Welcome!")
 print(f"Set site.title: {data.get('site.title')}")
 
 # Creating nested structures automatically
-data.set('config.cache.ttl', 3600)
+data.set("config.cache.ttl", 3600)
 print(f"Created nested path config.cache.ttl: {data.get('config.cache.ttl')}")
 
 # Using dot notation
-data.site.tagline = 'Building awesome things'
+data.site.tagline = "Building awesome things"
 print(f"Set via dot notation: {data.site.tagline}")
 
 # Using dictionary access
-data['settings']['notifications'] = True
+data["settings"]["notifications"] = True
 print(f"Set via dict access: {data['settings']['notifications']}")
 
 # ============================================================================
@@ -81,15 +80,15 @@ print("\n4. Getting Values with Defaults")
 print("-" * 70)
 
 # Existing key
-name = data.get('site.name', 'Default Name')
+name = data.get("site.name", "Default Name")
 print(f"Existing key: {name}")
 
 # Missing key with default
-email = data.get('site.email', 'no-email@example.com')
+email = data.get("site.email", "no-email@example.com")
 print(f"Missing key with default: {email}")
 
 # Nested missing key
-color = data.get('settings.theme.primary', '#000000')
+color = data.get("settings.theme.primary", "#000000")
 print(f"Nested missing key: {color}")
 
 # ============================================================================
@@ -117,21 +116,21 @@ print("\n6. Deleting Values")
 print("-" * 70)
 
 # Add a temporary value
-data.set('temp.value', 'delete me')
+data.set("temp.value", "delete me")
 print(f"Before delete - temp.value exists: {data.has('temp.value')}")
 
 # Delete using path notation
-deleted = data.delete('temp.value')
+deleted = data.delete("temp.value")
 print(f"Delete result: {deleted}")
 print(f"After delete - temp.value exists: {data.has('temp.value')}")
 
 # Try deleting non-existent key
-deleted = data.delete('nonexistent.key')
+deleted = data.delete("nonexistent.key")
 print(f"Delete non-existent key: {deleted}")
 
 # Delete using dictionary access
-data['settings']['test'] = 'temporary'
-del data['settings']['test']
+data["settings"]["test"] = "temporary"
+del data["settings"]["test"]
 print(f"Deleted using 'del' operator")
 
 # ============================================================================
@@ -161,15 +160,15 @@ print("\n8. Merging Data")
 print("-" * 70)
 
 # Create another datastore
-updates = NitroDataStore({
-    'site': {
-        'name': 'Updated Site Name',  # This will override
-        'version': '2.0'              # This will be added
-    },
-    'new_section': {
-        'value': 'new data'
+updates = NitroDataStore(
+    {
+        "site": {
+            "name": "Updated Site Name",  # This will override
+            "version": "2.0",  # This will be added
+        },
+        "new_section": {"value": "new data"},
     }
-})
+)
 
 print(f"Before merge - site.name: {data.site.name}")
 print(f"Before merge - site.version exists: {data.has('site.version')}")
