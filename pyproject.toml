@@ -8,13 +8,13 @@ version = "1.0.0"
 description = "Schema-agnostic JSON data store with dot notation, chainable queries, bulk operations, and built-in security features"
 readme = "README.md"
 authors = [
-    {name = "Nitro Team"}
+    { name = "Sean Nieuwoudt", email = "sean@underwulf.com" }
 ]
 license = {text = "MIT"}
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",

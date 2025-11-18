@@ -1038,7 +1038,7 @@ images = data.find_values(lambda v: isinstance(v, str) and v.endswith(('.jpg', '
 
 ## License
 
-GNU General Public License v3.0
+Please see [LICENSE](LICENSE) for licensing details.
 
 ## Contributing
 
