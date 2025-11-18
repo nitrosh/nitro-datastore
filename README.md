@@ -7,7 +7,6 @@ Nitro DataStore makes working with JSON data efficient and enjoyable. Access you
 ```python
 from nitro_datastore import NitroDataStore
 
-# Create from a dictionary
 data = NitroDataStore({
     'site': {
         'name': 'Nitro',
@@ -15,10 +14,14 @@ data = NitroDataStore({
     }
 })
 
-# Multiple ways to access the same value
-data.site.name                    # Dot notation
-data['site']['name']              # Dictionary access
-data.get('site.name')             # Path-based access
+# Dot notation
+data.site.name
+
+# Dictionary style access
+data['site']['name']
+
+# Path-based access
+data.get('site.name')
 ```
 
 ## Why Nitro DataStore?
