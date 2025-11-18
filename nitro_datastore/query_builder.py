@@ -113,7 +113,7 @@ class QueryBuilder:
 
         # Apply offset
         if self._offset_count > 0:
-            result = result[self._offset_count :]
+            result = result[self._offset_count:]
 
         # Apply limit
         if self._limit_count is not None:

@@ -1,6 +1,5 @@
 """Tests for collection operations and query builder."""
 
-import pytest
 from nitro_datastore import NitroDataStore
 
 

@@ -1,6 +1,5 @@
 """Tests for data introspection and analysis."""
 
-import pytest
 from nitro_datastore import NitroDataStore
 
 

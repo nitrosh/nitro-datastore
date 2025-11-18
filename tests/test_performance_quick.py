@@ -1,7 +1,6 @@
 """Quick performance tests with moderate-sized datasets."""
 
 import json
-import sys
 import time
 from nitro_datastore import NitroDataStore
 
@@ -80,7 +79,7 @@ class TestQuickPerformance:
         json_str = json.dumps(dataset)
         actual_size_mb = len(json_str.encode("utf-8")) / (1024 * 1024)
 
-        print(f"   ✓ Generated {actual_size_mb:.2f} MB in {generation_time:.2f}s")
+        print(f"   [OK] Generated {actual_size_mb:.2f} MB in {generation_time:.2f}s")
         print(f"   - Users: {len(dataset['users'])}")
         print(f"   - Posts: {len(dataset['posts'])}")
         print(f"   - Comments: {len(dataset['comments'])}")
@@ -89,7 +88,7 @@ class TestQuickPerformance:
         start = time.time()
         data = NitroDataStore(dataset)
         creation_time = time.time() - start
-        print(f"   ✓ Created in {creation_time:.2f}s")
+        print(f"   [OK] Created in {creation_time:.2f}s")
 
         print("\n3. Testing get() operations...")
         start = time.time()
@@ -99,7 +98,7 @@ class TestQuickPerformance:
             data.get("users.0.profile.interests")
         get_time = time.time() - start
         print(
-            f"   ✓ 300 get() operations in {get_time:.4f}s ({300/get_time:.0f} ops/sec)"
+            f"   [OK] 300 get() operations in {get_time:.4f}s ({300/get_time:.0f} ops/sec)"
         )
 
         print("\n4. Testing has() operations...")
@@ -110,7 +109,7 @@ class TestQuickPerformance:
             data.has("nonexistent.path")
         has_time = time.time() - start
         print(
-            f"   ✓ 300 has() operations in {has_time:.4f}s ({300/has_time:.0f} ops/sec)"
+            f"   [OK] 300 has() operations in {has_time:.4f}s ({300/has_time:.0f} ops/sec)"
         )
 
         print("\n5. Testing set() operations...")
@@ -119,7 +118,7 @@ class TestQuickPerformance:
             data.set(f"test.field{i}", f"value{i}")
         set_time = time.time() - start
         print(
-            f"   ✓ 100 set() operations in {set_time:.4f}s ({100/set_time:.0f} ops/sec)"
+            f"   [OK] 100 set() operations in {set_time:.4f}s ({100/set_time:.0f} ops/sec)"
         )
 
         print("\n6. Testing query() on users...")
@@ -130,7 +129,7 @@ class TestQuickPerformance:
             .execute()
         )
         query_time = time.time() - start
-        print(f"   ✓ Filtered {len(dark_users)} users in {query_time:.4f}s")
+        print(f"   [OK] Filtered {len(dark_users)} users in {query_time:.4f}s")
 
         print("\n7. Testing query() with sort and limit...")
         start = time.time()
@@ -142,31 +141,31 @@ class TestQuickPerformance:
             .execute()
         )
         query_complex_time = time.time() - start
-        print(f"   ✓ Found top {len(top_posts)} posts in {query_complex_time:.4f}s")
+        print(f"   [OK] Found top {len(top_posts)} posts in {query_complex_time:.4f}s")
 
         print("\n8. Testing list_paths()...")
         start = time.time()
         paths = data.list_paths(prefix="metadata")
         list_paths_time = time.time() - start
-        print(f"   ✓ Listed {len(paths)} paths in {list_paths_time:.4f}s")
+        print(f"   [OK] Listed {len(paths)} paths in {list_paths_time:.4f}s")
 
         print("\n9. Testing find_paths() with pattern...")
         start = time.time()
         email_paths = data.find_paths("users.*.email")
         find_paths_time = time.time() - start
-        print(f"   ✓ Found {len(email_paths)} email paths in {find_paths_time:.4f}s")
+        print(f"   [OK] Found {len(email_paths)} email paths in {find_paths_time:.4f}s")
 
         print("\n10. Testing find_all_keys()...")
         start = time.time()
         all_ids = data.find_all_keys("id")
         find_keys_time = time.time() - start
-        print(f"   ✓ Found {len(all_ids)} 'id' keys in {find_keys_time:.4f}s")
+        print(f"   [OK] Found {len(all_ids)} 'id' keys in {find_keys_time:.4f}s")
 
         print("\n11. Testing stats()...")
         start = time.time()
         stats = data.stats()
         stats_time = time.time() - start
-        print(f"   ✓ Generated stats in {stats_time:.4f}s")
+        print(f"   [OK] Generated stats in {stats_time:.4f}s")
         print(
             f"      Keys: {stats['total_keys']}, Depth: {stats['max_depth']}, "
             f"Dicts: {stats['total_dicts']}, Lists: {stats['total_lists']}"
@@ -176,7 +175,7 @@ class TestQuickPerformance:
         start = time.time()
         exported = data.to_dict()
         export_time = time.time() - start
-        print(f"   ✓ Exported to dict in {export_time:.4f}s")
+        print(f"   [OK] Exported to dict in {export_time:.4f}s")
         assert len(exported["users"]) == len(dataset["users"])
 
         print("\n13. Testing update_where() bulk operation...")
@@ -186,14 +185,14 @@ class TestQuickPerformance:
             transform=lambda value: "auto",
         )
         bulk_time = time.time() - start
-        print(f"   ✓ Bulk updated {updated_count} values in {bulk_time:.4f}s")
+        print(f"   [OK] Bulk updated {updated_count} values in {bulk_time:.4f}s")
 
         print("\n14. Testing merge() operation...")
         overlay = NitroDataStore({"metadata": {"merged": True}, "new_field": "test"})
         start = time.time()
         data.merge(overlay)
         merge_time = time.time() - start
-        print(f"   ✓ Merged datastore in {merge_time:.4f}s")
+        print(f"   [OK] Merged datastore in {merge_time:.4f}s")
         assert data.get("metadata.merged") is True
 
         print("\n15. Testing flatten() on subset...")
@@ -201,7 +200,7 @@ class TestQuickPerformance:
         metadata_ds = NitroDataStore(data.get("metadata"))
         flattened = metadata_ds.flatten()
         flatten_time = time.time() - start
-        print(f"   ✓ Flattened in {flatten_time:.4f}s ({len(flattened)} keys)")
+        print(f"   [OK] Flattened in {flatten_time:.4f}s ({len(flattened)} keys)")
 
         print("\n" + "=" * 70)
         print("SUMMARY")
@@ -229,7 +228,7 @@ class TestQuickPerformance:
         print(f"Generation + Creation: {generation_time + creation_time:.2f}s")
         print(f"Operations time: {total_ops_time:.2f}s")
         print(f"Total time: {total_time:.2f}s")
-        print(f"\n✓ All operations completed successfully!")
+        print("\n[OK] All operations completed successfully!")
         print("=" * 70)
 
         assert True
@@ -249,7 +248,7 @@ class TestMemoryEfficiency:
         data = NitroDataStore(dataset)
 
         json_size = len(json.dumps(dataset).encode("utf-8")) / (1024 * 1024)
-        print(f"   ✓ Dataset: {json_size:.2f} MB")
+        print(f"   [OK] Dataset: {json_size:.2f} MB")
 
         print("\n2. Testing repeated operations don't grow memory...")
         start = time.time()
@@ -257,18 +256,16 @@ class TestMemoryEfficiency:
             data.get("users.0.username")
             data.has("posts.0.title")
             if i % 10 == 0:
-                data.set(f"temp.key{i%10}", f"value{i}")
+                data.set(f"temp.key{i % 10}", f"value{i}")
         ops_time = time.time() - start
-        print(f"   ✓ 3000 operations in {ops_time:.2f}s")
+        print(f"   [OK] 3000 operations in {ops_time:.2f}s")
 
         print("\n3. Testing query doesn't leak memory...")
         start = time.time()
         for _ in range(50):
-            results = (
-                data.query("users").where(lambda u: u.get("id", 0) < 100).execute()
-            )
+            data.query("users").where(lambda u: u.get("id", 0) < 100).execute()
         query_time = time.time() - start
-        print(f"   ✓ 50 queries in {query_time:.2f}s")
+        print(f"   [OK] 50 queries in {query_time:.2f}s")
 
         print("\n4. Testing to_dict() creates proper copies...")
         start = time.time()
@@ -276,10 +273,10 @@ class TestMemoryEfficiency:
             copy = data.to_dict()
             assert "users" in copy
         copy_time = time.time() - start
-        print(f"   ✓ 10 copies in {copy_time:.2f}s")
+        print(f"   [OK] 10 copies in {copy_time:.2f}s")
 
         print("\n" + "=" * 70)
-        print("✓ Memory efficiency verified!")
+        print("[OK] Memory efficiency verified!")
         print("=" * 70)
 
         assert True

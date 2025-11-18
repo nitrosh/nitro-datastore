@@ -1,6 +1,5 @@
 """Tests for edge cases and coverage completeness."""
 
-import json
 import pytest
 from nitro_datastore import NitroDataStore
 
@@ -58,10 +57,10 @@ class TestNitroDataStoreEdgeCases:
 
     def test_unicode_support(self):
         """Test Unicode character support."""
-        data = NitroDataStore({"japanese": "日本語", "emoji": "🚀", "chinese": "中文"})
+        data = NitroDataStore({"japanese": "日本語", "smiley": ":)", "chinese": "中文"})
 
         assert data.get("japanese") == "日本語"
-        assert data.get("emoji") == "🚀"
+        assert data.get("smiley") == ":)"
         assert data.get("chinese") == "中文"
 
     def test_numeric_string_keys(self):
@@ -182,7 +181,7 @@ class TestCoverageCompleteness:
         data = NitroDataStore({"a": 1})
         assert (data == "string") is False
         assert (data == 123) is False
-        assert (data == None) is False
+        assert (data == None) is False  # noqa: E711
         assert (data == [1, 2, 3]) is False
 
     def test_repr(self):

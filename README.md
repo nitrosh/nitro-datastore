@@ -741,7 +741,7 @@ Detects circular references to prevent infinite recursion and stack overflow.
 data = NitroDataStore({
     'level1': {'level2': {'level3': {'value': 'deep'}}}
 })
-copied = data.to_dict()  # ✓ OK
+copied = data.to_dict()  # [OK] OK
 
 # Circular references are detected
 circular = {'a': 1}

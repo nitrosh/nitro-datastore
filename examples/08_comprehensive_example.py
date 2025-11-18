@@ -396,14 +396,14 @@ Files created:
   - {analytics_file}
 
 This example demonstrated:
-  ✓ Loading data from multiple files
-  ✓ Data cleaning and normalization
-  ✓ Querying and filtering
-  ✓ Path operations
-  ✓ Bulk updates and transformations
-  ✓ Analytics calculation
-  ✓ Change tracking
-  ✓ Saving results
+  [OK] Loading data from multiple files
+  [OK] Data cleaning and normalization
+  [OK] Querying and filtering
+  [OK] Path operations
+  [OK] Bulk updates and transformations
+  [OK] Analytics calculation
+  [OK] Change tracking
+  [OK] Saving results
 """
 )
 

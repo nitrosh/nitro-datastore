@@ -1,6 +1,5 @@
 """Tests for bulk data operations."""
 
-import pytest
 from nitro_datastore import NitroDataStore
 
 

@@ -44,7 +44,7 @@ def demo_path_traversal_protection():
         print(f"    unsafe/")
         print(f"      secrets.json")
 
-        print("\n✓ Loading file within base_dir (ALLOWED):")
+        print("\n[OK] Loading file within base_dir (ALLOWED):")
         data = NitroDataStore.from_file(safe_dir / "config.json", base_dir=safe_dir)
         print(f"  Loaded: {data.to_dict()}")
 
@@ -56,7 +56,7 @@ def demo_path_traversal_protection():
         except ValueError as e:
             print(f"  Blocked: {e}")
 
-        print("\n✓ Loading without base_dir (backward compatible):")
+        print("\n[OK] Loading without base_dir (backward compatible):")
         data = NitroDataStore.from_file(unsafe_dir / "secrets.json")
         print(f"  Loaded: {data.to_dict()}")
         print(f"  Note: Only use without base_dir for trusted paths")
@@ -85,7 +85,7 @@ def demo_file_size_limits():
         print(f"  small.json: {small_size} bytes")
         print(f"  large.json: {large_size} bytes")
 
-        print(f"\n✓ Loading small file with 10KB limit (ALLOWED):")
+        print(f"\n[OK] Loading small file with 10KB limit (ALLOWED):")
         data = NitroDataStore.from_file(small_file, max_size=10 * 1024)
         print(f"  Loaded successfully")
 
@@ -96,7 +96,7 @@ def demo_file_size_limits():
         except ValueError as e:
             print(f"  Blocked: {e}")
 
-        print(f"\n✓ Loading large file without limit (backward compatible):")
+        print(f"\n[OK] Loading large file without limit (backward compatible):")
         data = NitroDataStore.from_file(large_file)
         print(f"  Loaded successfully")
         print(f"  Note: Only use without max_size for trusted sources")
@@ -110,7 +110,7 @@ def demo_path_validation():
 
     data = NitroDataStore({"user": {"name": "Alice", "age": 30}})
 
-    print("\n✓ Valid paths (ALLOWED):")
+    print("\n[OK] Valid paths (ALLOWED):")
     valid_paths = ["user", "user.name", "user.age", "config.theme.color"]
     for path in valid_paths:
         try:
@@ -149,7 +149,7 @@ def demo_circular_reference_protection():
     print("\nDetects circular references to prevent infinite recursion.")
     print("Applied during deep copy, merge, and serialization operations.")
 
-    print("\n✓ Normal nested structures (ALLOWED):")
+    print("\n[OK] Normal nested structures (ALLOWED):")
     normal_data = {"level1": {"level2": {"level3": {"value": "deep"}}}}
     data = NitroDataStore(normal_data)
     copied = data.to_dict()
@@ -206,7 +206,7 @@ def demo_combined_protections():
         config_file = safe_dir / "config.json"
         config_file.write_text('{"app": "secure", "version": "1.0"}')
 
-        print(f"\n✓ Loading with both path and size protections:")
+        print(f"\n[OK] Loading with both path and size protections:")
         data = NitroDataStore.from_file(
             config_file, base_dir=safe_dir, max_size=1024 * 1024
         )
@@ -214,7 +214,7 @@ def demo_combined_protections():
         print(f"  - Path validated against base_dir")
         print(f"  - Size checked against max_size")
 
-        print(f"\n✓ All operations validate paths:")
+        print(f"\n[OK] All operations validate paths:")
         data.set("app.name", "SecureApp")
         print(f"  set() validated path: 'app.name'")
 
@@ -228,17 +228,17 @@ def demo_combined_protections():
 def demo_security_best_practices():
     section("6. Security Best Practices")
 
-    print("\n✓ DO: Use base_dir for user-supplied paths")
+    print("\n[OK] DO: Use base_dir for user-supplied paths")
     print("  data = NitroDataStore.from_file(user_path, base_dir='/safe/uploads')")
 
-    print("\n✓ DO: Use max_size to prevent DoS attacks")
+    print("\n[OK] DO: Use max_size to prevent DoS attacks")
     print("  data = NitroDataStore.from_file(path, max_size=10*1024*1024)  # 10MB")
 
-    print("\n✓ DO: Validate paths early with has() before operations")
+    print("\n[OK] DO: Validate paths early with has() before operations")
     print("  if data.has(user_key):")
     print("      value = data.get(user_key)")
 
-    print("\n✓ DO: Use try-except for error handling")
+    print("\n[OK] DO: Use try-except for error handling")
     print("  try:")
     print("      data = NitroDataStore.from_file(path, base_dir=safe_dir)")
     print("  except (FileNotFoundError, ValueError) as e:")

@@ -2,7 +2,10 @@
 
 import json
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterator, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Union
+
+if TYPE_CHECKING:
+    from nitro_datastore.query_builder import QueryBuilder
 
 _GLOB_DOUBLE_WILDCARD_PLACEHOLDER = "___DOUBLE_WILDCARD___"
 _GLOB_DOUBLE_WILDCARD_PATTERN = "**"
@@ -206,7 +209,8 @@ class NitroDataStore:
                         size_mb = file_size / (1024 * 1024)
                         limit_mb = max_size / (1024 * 1024)
                         raise ValueError(
-                            f"File size ({size_mb:.2f} MB) exceeds maximum allowed size ({limit_mb:.2f} MB) for file: {file_path}"
+                            f"File size ({size_mb:.2f} MB) exceeds maximum allowed size "
+                            f"({limit_mb:.2f} MB) for file: {file_path}"
                         )
 
                 with open(file_path, "r", encoding="utf-8") as f:
