@@ -1027,13 +1027,17 @@ class NitroDataStore:
             return []
         return [item for item in value if predicate(item)]
 
+    def _wrap_value(self, value: Any) -> Any:
+        """Wrap dicts in NitroDataStore, including dicts inside lists."""
+        if isinstance(value, dict):
+            return NitroDataStore(value)
+        elif isinstance(value, list):
+            return [self._wrap_value(item) for item in value]
+        return value
+
     def __getitem__(self, key: str) -> Any:
         """Dictionary-style access: data['key']"""
-        result = self._data[key]
-        # Wrap nested dicts in NitroDataStore for chained access
-        if isinstance(result, dict):
-            return NitroDataStore(result)
-        return result
+        return self._wrap_value(self._data[key])
 
     def __setitem__(self, key: str, value: Any) -> None:
         """Dictionary-style assignment: data['key'] = value"""
@@ -1052,17 +1056,12 @@ class NitroDataStore:
     def __getattr__(self, name: str) -> Any:
         """Dot notation access: data.key"""
         if name.startswith("_"):
-            # Allow access to private attributes
             raise AttributeError(
                 f"'{type(self).__name__}' object has no attribute '{name}'"
             )
 
         if name in self._data:
-            result = self._data[name]
-            # Wrap nested dicts in NitroDataStore for chained access
-            if isinstance(result, dict):
-                return NitroDataStore(result)
-            return result
+            return self._wrap_value(self._data[name])
 
         raise AttributeError(f"'{type(self).__name__}' has no attribute '{name}'")
 

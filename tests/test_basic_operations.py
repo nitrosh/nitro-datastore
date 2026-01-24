@@ -408,3 +408,143 @@ class TestNitroDataStoreMagicMethods:
         data = NitroDataStore({"site": {"name": "Test"}})
         str_output = str(data)
         assert "\n" in str_output
+
+
+class TestListWrapping:
+    """Test that dicts inside lists are wrapped in NitroDataStore."""
+
+    def test_list_of_dicts_dot_access(self):
+        """Test accessing list of dicts via dot notation wraps items."""
+        data = NitroDataStore({
+            "services": [
+                {"title": "Backend", "price": 100},
+                {"title": "Frontend", "price": 80}
+            ]
+        })
+        services = data.services
+        assert isinstance(services, list)
+        assert len(services) == 2
+        assert isinstance(services[0], NitroDataStore)
+        assert services[0].title == "Backend"
+        assert services[1].price == 80
+
+    def test_list_of_dicts_dict_access(self):
+        """Test accessing list of dicts via dictionary access wraps items."""
+        data = NitroDataStore({
+            "items": [
+                {"name": "Item 1", "value": 10},
+                {"name": "Item 2", "value": 20}
+            ]
+        })
+        items = data["items"]
+        assert isinstance(items, list)
+        assert isinstance(items[0], NitroDataStore)
+        assert items[0]["name"] == "Item 1"
+        assert items[1]["value"] == 20
+
+    def test_nested_dicts_in_list_items(self):
+        """Test that nested dicts within list items are also wrapped."""
+        data = NitroDataStore({
+            "users": [
+                {"name": "Alice", "address": {"city": "NYC", "zip": "10001"}},
+                {"name": "Bob", "address": {"city": "LA", "zip": "90001"}}
+            ]
+        })
+        users = data.users
+        assert isinstance(users[0].address, NitroDataStore)
+        assert users[0].address.city == "NYC"
+        assert users[1].address.zip == "90001"
+
+    def test_deeply_nested_list_wrapping(self):
+        """Test wrapping works for deeply nested structures."""
+        data = NitroDataStore({
+            "company": {
+                "departments": [
+                    {
+                        "name": "Engineering",
+                        "teams": [
+                            {"name": "Backend", "lead": {"name": "Alice"}},
+                            {"name": "Frontend", "lead": {"name": "Bob"}}
+                        ]
+                    }
+                ]
+            }
+        })
+        dept = data.company.departments[0]
+        assert isinstance(dept, NitroDataStore)
+        assert dept.name == "Engineering"
+        assert isinstance(dept.teams, list)
+        assert isinstance(dept.teams[0], NitroDataStore)
+        assert dept.teams[0].name == "Backend"
+        assert isinstance(dept.teams[0].lead, NitroDataStore)
+        assert dept.teams[0].lead.name == "Alice"
+
+    def test_list_of_primitives_unchanged(self):
+        """Test that lists of primitives remain unchanged."""
+        data = NitroDataStore({
+            "numbers": [1, 2, 3, 4, 5],
+            "strings": ["a", "b", "c"],
+            "mixed": [1, "two", 3.0, True, None]
+        })
+        assert data.numbers == [1, 2, 3, 4, 5]
+        assert data.strings == ["a", "b", "c"]
+        assert data.mixed == [1, "two", 3.0, True, None]
+        assert data["numbers"] == [1, 2, 3, 4, 5]
+
+    def test_empty_list_unchanged(self):
+        """Test that empty lists remain unchanged."""
+        data = NitroDataStore({"empty": []})
+        assert data.empty == []
+        assert data["empty"] == []
+
+    def test_mixed_list_partial_wrapping(self):
+        """Test lists with both dicts and primitives wrap only dicts."""
+        data = NitroDataStore({
+            "entries": [
+                {"type": "dict", "value": 1},
+                "string",
+                42,
+                {"type": "dict", "value": 2}
+            ]
+        })
+        entries = data.entries
+        assert isinstance(entries[0], NitroDataStore)
+        assert entries[0].type == "dict"
+        assert entries[1] == "string"
+        assert entries[2] == 42
+        assert isinstance(entries[3], NitroDataStore)
+        assert entries[3].value == 2
+
+    def test_list_item_chained_access(self):
+        """Test chained access through list items."""
+        data = NitroDataStore({
+            "posts": [
+                {"author": {"profile": {"avatar": "alice.png"}}},
+                {"author": {"profile": {"avatar": "bob.png"}}}
+            ]
+        })
+        assert data.posts[0].author.profile.avatar == "alice.png"
+        assert data["posts"][1]["author"]["profile"]["avatar"] == "bob.png"
+
+    def test_nested_lists(self):
+        """Test lists containing lists."""
+        data = NitroDataStore({
+            "matrix": [[1, 2], [3, 4]],
+            "nested": [[{"x": 1}], [{"x": 2}]]
+        })
+        assert data.matrix == [[1, 2], [3, 4]]
+        nested = data.nested
+        assert isinstance(nested[0][0], NitroDataStore)
+        assert nested[0][0].x == 1
+
+    def test_list_wrapping_via_both_access_methods(self):
+        """Test that both access methods produce equivalent wrapped results."""
+        data = NitroDataStore({
+            "records": [{"id": 1}, {"id": 2}]
+        })
+        via_dot = data.records
+        via_bracket = data["records"]
+
+        assert len(via_dot) == len(via_bracket)
+        assert type(via_dot[0]) == type(via_bracket[0])
+        assert via_dot[0].id == via_bracket[0].id
