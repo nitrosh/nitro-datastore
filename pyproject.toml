@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nitro-datastore"
-version = "1.0.0"
+version = "1.0.1"
 description = "Schema-agnostic JSON data store with dot notation, chainable queries, bulk operations, and built-in security features"
 readme = "README.md"
 authors = [
@@ -21,6 +21,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Utilities",
     "Natural Language :: English"
