@@ -147,7 +147,10 @@ class QueryBuilder:
         Example:
             >>> first_post = query.where(...).sort(...).first()
         """
-        results = self.limit(1).execute()
+        saved_limit = self._limit_count
+        self._limit_count = 1
+        results = self.execute()
+        self._limit_count = saved_limit
         return results[0] if results else None
 
     def pluck(self, key: str) -> List[Any]:
