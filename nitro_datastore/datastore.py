@@ -133,6 +133,7 @@ class NitroDataStore:
         pattern: str = "*.json",
         base_dir: Optional[Union[str, Path]] = None,
         max_size: Optional[int] = None,
+        strict: bool = False,
     ) -> "NitroDataStore":
         """Load and merge all JSON files from a directory.
 
@@ -145,6 +146,8 @@ class NitroDataStore:
                       If provided, directory must be within this base directory.
             max_size: Optional maximum file size in bytes. If provided, files
                       exceeding this size will raise ValueError.
+            strict: If True, raise exceptions for invalid JSON files instead of
+                    skipping them silently. Default is False for backward compatibility.
 
         Returns:
             NitroDataStore instance with merged data
@@ -153,6 +156,8 @@ class NitroDataStore:
             FileNotFoundError: If directory doesn't exist
             ValueError: If directory escapes base_dir (when base_dir is set) or
                         if any file exceeds max_size (when max_size is set)
+            json.JSONDecodeError: If strict=True and a file contains invalid JSON
+            IOError: If strict=True and a file cannot be read
 
         Security:
             - When base_dir is provided, validates that the resolved directory path
@@ -170,12 +175,8 @@ class NitroDataStore:
             >>> # With size limits (10 MB max per file)
             >>> data = NitroDataStore.from_directory('configs/', max_size=10*1024*1024)
 
-            >>> # Combined validation
-            >>> data = NitroDataStore.from_directory(
-            ...     'configs/',
-            ...     base_dir='/app/data',
-            ...     max_size=10*1024*1024
-            ... )
+            >>> # Strict mode - fail on invalid JSON
+            >>> data = NitroDataStore.from_directory('configs/', strict=True)
         """
         dir_path = Path(directory)
 
@@ -217,6 +218,8 @@ class NitroDataStore:
                     file_data = json.load(f)
                     merged_data = cls._deep_merge(merged_data, file_data)
             except (json.JSONDecodeError, IOError):
+                if strict:
+                    raise
                 continue
 
         return cls(merged_data)
@@ -944,22 +947,20 @@ class NitroDataStore:
         removed = {}
         changed = {}
 
-        # Find all paths in both structures
+        other_store = NitroDataStore(other_data)
+
         self_paths = set(self.list_paths())
-        other_paths = set(NitroDataStore(other_data).list_paths())
+        other_paths = set(other_store.list_paths())
 
-        # Find added paths
         for path in other_paths - self_paths:
-            added[path] = NitroDataStore(other_data).get(path)
+            added[path] = other_store.get(path)
 
-        # Find removed paths
         for path in self_paths - other_paths:
             removed[path] = self.get(path)
 
-        # Find changed values
         for path in self_paths & other_paths:
             self_val = self.get(path)
-            other_val = NitroDataStore(other_data).get(path)
+            other_val = other_store.get(path)
             if self_val != other_val:
                 changed[path] = {"old": self_val, "new": other_val}
 
