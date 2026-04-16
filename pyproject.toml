@@ -40,10 +40,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/nitro-sh/nitro-datastore"
-Documentation = "https://github.com/nitro-sh/nitro-datastore#readme"
-Repository = "https://github.com/nitro-sh/nitro-datastore"
-Issues = "https://github.com/nitro-sh/nitro-datastore/issues"
+Homepage = "https://github.com/nitrosh/nitro-datastore"
+Documentation = "https://github.com/nitrosh/nitro-datastore#readme"
+Repository = "https://github.com/nitrosh/nitro-datastore"
+Issues = "https://github.com/nitrosh/nitro-datastore/issues"
 
 [tool.setuptools]
 packages = ["nitro_datastore"]
