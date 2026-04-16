@@ -187,10 +187,11 @@ See the [examples/](examples/) directory for comprehensive demos:
 
 ## Ecosystem
 
-- **[nitro-ui](https://github.com/nitrosh/nitro-ui)** - Programmatic HTML generation
-- **[nitro-cli](https://github.com/nitrosh/nitro-cli)** - Static site generator
-- **[nitro-dispatch](https://github.com/nitrosh/nitro-dispatch)** - Plugin system
-- **[nitro-validate](https://github.com/nitrosh/nitro-validate)** - Data validation
+- **[nitro-ui](https://github.com/nitrosh/nitro-ui)** - Build HTML with Python, not strings
+- **[nitro-cli](https://github.com/nitrosh/nitro-cli)** - Static site generator powered by nitro-ui
+- **[nitro-dispatch](https://github.com/nitrosh/nitro-dispatch)** - Framework-agnostic plugin system
+- **[nitro-image](https://github.com/nitrosh/nitro-image)** - Fast, friendly image processing for the web
+- **[nitro-validate](https://github.com/nitrosh/nitro-validate)** - Dependency-free data validation
 
 ## License
 
