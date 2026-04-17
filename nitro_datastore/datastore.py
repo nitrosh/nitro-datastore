@@ -362,6 +362,13 @@ class NitroDataStore:
 
         Raises:
             ValueError: If key is empty, whitespace-only, or has empty segments
+
+        Example:
+            >>> data = NitroDataStore({'site': {'name': 'My Site'}})
+            >>> data.has('site.name')
+            True
+            >>> data.has('site.missing')
+            False
         """
         self._validate_path(key)
 
@@ -382,8 +389,20 @@ class NitroDataStore:
     def merge(self, other: Union["NitroDataStore", Dict[str, Any]]) -> None:
         """Deep merge another data store or dictionary into this one.
 
+        Mutates this datastore in place. Nested dicts are merged recursively;
+        non-dict values (including lists) from `other` overwrite existing values.
+
         Args:
-            other: Another NitroDataStore or dict to merge in
+            other: Another NitroDataStore or dict to merge in.
+
+        Raises:
+            ValueError: If a circular reference is detected during merge.
+
+        Example:
+            >>> data = NitroDataStore({'site': {'name': 'A', 'theme': 'dark'}})
+            >>> data.merge({'site': {'theme': 'light', 'url': 'a.com'}})
+            >>> data.to_dict()
+            {'site': {'name': 'A', 'theme': 'light', 'url': 'a.com'}}
         """
         if isinstance(other, NitroDataStore):
             other_data = other._data
@@ -396,17 +415,38 @@ class NitroDataStore:
     def to_dict(self) -> Dict[str, Any]:
         """Export data as a plain dictionary.
 
+        Returns a deep copy, so mutations on the result do not affect the
+        datastore (and vice versa).
+
         Returns:
-            A deep copy of the internal data dictionary
+            A deep copy of the internal data dictionary.
+
+        Raises:
+            ValueError: If a circular reference is detected during the copy.
+
+        Example:
+            >>> data = NitroDataStore({'site': {'name': 'My Site'}})
+            >>> plain = data.to_dict()
+            >>> plain['site']['name'] = 'Mutated'
+            >>> data.get('site.name')
+            'My Site'
         """
         return self._deep_copy(self._data)
 
     def save(self, file_path: Union[str, Path], indent: int = 2) -> None:
         """Save data to a JSON file.
 
+        Creates parent directories if they do not exist. Non-ASCII characters
+        are written as-is (UTF-8 encoded, not escaped).
+
         Args:
-            file_path: Path to save JSON file
-            indent: JSON indentation (default: 2)
+            file_path: Destination JSON file path.
+            indent: JSON indentation in spaces. Defaults to 2.
+
+        Example:
+            >>> data = NitroDataStore({'site': {'name': 'My Site'}})
+            >>> data.save('output/config.json')
+            >>> data.save('output/compact.json', indent=0)
         """
         path = Path(file_path)
         path.parent.mkdir(parents=True, exist_ok=True)
