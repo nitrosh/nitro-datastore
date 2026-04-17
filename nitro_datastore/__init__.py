@@ -18,5 +18,5 @@ Example:
 from nitro_datastore.datastore import NitroDataStore
 from nitro_datastore.query_builder import QueryBuilder
 
-__version__ = "1.0.4"
+__version__ = "1.0.5"
 __all__ = ["NitroDataStore", "QueryBuilder"]

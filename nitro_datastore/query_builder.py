@@ -1,6 +1,6 @@
 """Query builder for filtering and transforming collections."""
 
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 
 class QueryBuilder:
@@ -169,14 +169,18 @@ class QueryBuilder:
         results = self.execute()
         return [item.get(key) if isinstance(item, dict) else None for item in results]
 
-    def group_by(self, key: str) -> dict:
+    def group_by(self, key: str) -> Dict[Any, List[Any]]:
         """Group results by a field value.
 
+        Non-dict items in the result set are skipped. Items missing `key` are
+        grouped under `None`.
+
         Args:
-            key: Key to group by
+            key: Field name to group by.
 
         Returns:
-            Dictionary mapping key values to lists of items
+            Mapping from each distinct field value to the list of items
+            that share it.
 
         Example:
             >>> by_category = query.group_by('category')
