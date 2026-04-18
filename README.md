@@ -2,17 +2,10 @@
 
 A flexible, schema-free data store for JSON in Python. Access nested data with dot notation, dictionary style, or path strings.
 
-```python
-from nitro_datastore import NitroDataStore
-
-data = NitroDataStore({'site': {'name': 'Nitro', 'url': 'https://nitro.sh'}})
-
-data.site.name              # Dot notation
-data['site']['name']        # Dictionary style
-data.get('site.name')       # Path-based with defaults
-```
-
-No more `config.get('site', {}).get('theme', {}).get('color', '#000')`. Just `config.get('site.theme.color', '#000')`.
+[![PyPI](https://img.shields.io/pypi/v/nitro-datastore?color=green)](https://pypi.org/project/nitro-datastore/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nitro-datastore)](https://pypi.org/project/nitro-datastore/)
+[![PyPI - License](https://img.shields.io/pypi/l/nitro-datastore)](https://pypi.org/project/nitro-datastore/)
+[![image](https://img.shields.io/github/actions/workflow/status/nitrosh/nitro-datastore/test.yml?branch=main)](https://github.com/nitrosh/nitro-datastore/actions?query=branch%3Amain)
 
 ## Installation
 
@@ -27,6 +20,18 @@ npx skills add nitrosh/nitro-datastore
 ```
 
 ## Quick Start
+
+```python
+from nitro_datastore import NitroDataStore
+
+data = NitroDataStore({'site': {'name': 'Nitro', 'url': 'https://nitro.sh'}})
+
+data.site.name              # Dot notation
+data['site']['name']        # Dictionary style
+data.get('site.name')       # Path-based with defaults
+```
+
+No more `config.get('site', {}).get('theme', {}).get('color', '#000')`. Just `config.get('site.theme.color', '#000')`.
 
 ### Creating a DataStore
 
