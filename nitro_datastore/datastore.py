@@ -433,7 +433,12 @@ class NitroDataStore:
         """
         return self._deep_copy(self._data)
 
-    def save(self, file_path: Union[str, Path], indent: int = 2) -> None:
+    def save(
+        self,
+        file_path: Union[str, Path],
+        indent: int = 2,
+        base_dir: Optional[Union[str, Path]] = None,
+    ) -> None:
         """Save data to a JSON file.
 
         Creates parent directories if they do not exist. Non-ASCII characters
@@ -442,13 +447,43 @@ class NitroDataStore:
         Args:
             file_path: Destination JSON file path.
             indent: JSON indentation in spaces. Defaults to 2.
+            base_dir: Optional base directory to restrict writes.
+                      If provided, the resolved destination must be inside
+                      this directory. Path traversal (e.g. via ``..``) and
+                      absolute paths outside ``base_dir`` raise ValueError.
+
+        Raises:
+            ValueError: If file_path escapes base_dir (when base_dir is set).
+
+        Security:
+            When base_dir is provided, the resolved destination is checked
+            against the resolved base directory *before* any parent directory
+            is created on disk, preventing traversal-induced directory
+            creation outside the sandbox.
 
         Example:
             >>> data = NitroDataStore({'site': {'name': 'My Site'}})
             >>> data.save('output/config.json')
             >>> data.save('output/compact.json', indent=0)
+            >>> data.save('configs/app.json', base_dir='/app/data')
         """
         path = Path(file_path)
+
+        if base_dir is not None:
+            base_path = Path(base_dir).resolve()
+            resolved_path = path.resolve()
+
+            try:
+                resolved_path.relative_to(base_path)
+            except ValueError:
+                raise ValueError(
+                    f"Path traversal detected: '{file_path}' resolves to "
+                    f"'{resolved_path}' which is outside base directory "
+                    f"'{base_path}'"
+                )
+
+            path = resolved_path
+
         path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(path, "w", encoding="utf-8") as f:
@@ -523,7 +558,7 @@ class NitroDataStore:
             >>> data.list_paths()
             ['site.name', 'site.url']
         """
-        cache_key = (separator, prefix)
+        cache_key = (id(self._data), separator, prefix)
 
         if cache_key in self._paths_cache:
             return self._paths_cache[cache_key].copy()
@@ -1069,9 +1104,17 @@ class NitroDataStore:
         return [item for item in value if predicate(item)]
 
     def _wrap_value(self, value: Any) -> Any:
-        """Wrap dicts in NitroDataStore, including dicts inside lists."""
+        """Wrap dicts in NitroDataStore, including dicts inside lists.
+
+        Wrapped children share the parent's `_paths_cache` dict by reference
+        so a mutation through any view invalidates entries for every view of
+        the same underlying data. Cache keys are scoped by `id(self._data)`
+        in `list_paths`, so subtrees do not collide on the same cache slot.
+        """
         if isinstance(value, dict):
-            return NitroDataStore(value)
+            child = NitroDataStore(value)
+            child._paths_cache = self._paths_cache
+            return child
         elif isinstance(value, list):
             return [self._wrap_value(item) for item in value]
         return value

@@ -496,3 +496,79 @@ class TestCircularReferenceProtection:
             result["level1"]["level2"]["level3"]["level4"]
             is not obj["level1"]["level2"]["level3"]["level4"]
         )
+
+    def test_deep_merge_with_sibling_shared_refs(self):
+        """Shared dict refs at sibling positions must not be flagged as circular."""
+        shared_overlay = {"name": "shared"}
+        base = {"a": {"existing": 1}, "b": {"existing": 2}}
+        overlay = {"a": shared_overlay, "b": shared_overlay}
+
+        result = NitroDataStore._deep_merge(base, overlay)
+
+        assert result == {
+            "a": {"existing": 1, "name": "shared"},
+            "b": {"existing": 2, "name": "shared"},
+        }
+
+    def test_deep_merge_with_shared_base_subdict(self):
+        """Same base dict referenced from multiple keys merges without false cycle."""
+        shared_base = {"x": 1}
+        base = {"a": shared_base, "b": shared_base}
+        overlay = {"a": {"y": 10}, "b": {"y": 20}}
+
+        result = NitroDataStore._deep_merge(base, overlay)
+
+        assert result["a"] == {"x": 1, "y": 10}
+        assert result["b"] == {"x": 1, "y": 20}
+
+
+class TestSavePathTraversalProtection:
+    """save() must accept the same base_dir / max_size knobs as from_file."""
+
+    def test_save_without_base_dir_backward_compatible(self, tmp_path):
+        data = NitroDataStore({"k": "v"})
+        out = tmp_path / "out.json"
+        data.save(out)
+        assert out.exists()
+
+    def test_save_with_base_dir_valid(self, tmp_path):
+        data = NitroDataStore({"k": "v"})
+        out = tmp_path / "out.json"
+        data.save(out, base_dir=tmp_path)
+        assert out.exists()
+
+    def test_save_with_base_dir_subdir_valid(self, tmp_path):
+        data = NitroDataStore({"k": "v"})
+        sub = tmp_path / "nested"
+        out = sub / "out.json"
+        data.save(out, base_dir=tmp_path)
+        assert out.exists()
+
+    def test_save_blocks_path_traversal_via_parent(self, tmp_path):
+        data = NitroDataStore({"k": "v"})
+        safe = tmp_path / "safe"
+        safe.mkdir()
+        evil = safe / ".." / "evil.json"
+
+        with pytest.raises(ValueError, match="Path traversal detected"):
+            data.save(evil, base_dir=safe)
+
+    def test_save_blocks_absolute_path_outside_base(self, tmp_path):
+        import tempfile
+
+        data = NitroDataStore({"k": "v"})
+        with tempfile.TemporaryDirectory() as outside_dir:
+            target = f"{outside_dir}/escaped.json"
+            with pytest.raises(ValueError, match="Path traversal detected"):
+                data.save(target, base_dir=tmp_path)
+
+    def test_save_does_not_create_parents_outside_base_dir(self, tmp_path):
+        data = NitroDataStore({"k": "v"})
+        safe = tmp_path / "safe"
+        safe.mkdir()
+        evil = safe / ".." / "newly_created" / "evil.json"
+
+        with pytest.raises(ValueError, match="Path traversal detected"):
+            data.save(evil, base_dir=safe)
+
+        assert not (tmp_path / "newly_created").exists()
