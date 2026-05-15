@@ -227,3 +227,64 @@ class TestCoverageCompleteness:
         assert deep._data is not data._data
         deep._data["b"]["c"] = 999
         assert data._data["b"]["c"] == 2
+
+
+class TestCacheConsistency:
+    """Cache invalidation must reach every wrapped view of the same data."""
+
+    def test_child_cache_reflects_parent_mutation(self):
+        data = NitroDataStore({"site": {"name": "Test"}})
+        child = data.site
+        assert child.list_paths() == ["name"]
+
+        data.set("site.url", "example.com")
+
+        assert "url" in child.list_paths()
+
+    def test_parent_cache_reflects_child_mutation(self):
+        data = NitroDataStore({"site": {"name": "Test"}})
+        assert "site.name" in data.list_paths()
+
+        child = data.site
+        child.url = "example.com"
+
+        assert "site.url" in data.list_paths()
+
+    def test_sibling_caches_stay_in_sync(self):
+        data = NitroDataStore({"site": {"name": "Test"}})
+        child_a = data.site
+        child_b = data.site
+        assert child_a.list_paths() == ["name"]
+        assert child_b.list_paths() == ["name"]
+
+        child_a.url = "example.com"
+
+        assert "url" in child_b.list_paths()
+
+    def test_child_cache_distinct_from_parent_cache(self):
+        data = NitroDataStore({"site": {"name": "Test"}, "other": "value"})
+        parent_paths = data.list_paths()
+        child_paths = data.site.list_paths()
+
+        assert "site" in parent_paths
+        assert "site.name" in parent_paths
+        assert "other" in parent_paths
+        assert child_paths == ["name"]
+
+    def test_setitem_via_child_invalidates_parent(self):
+        data = NitroDataStore({"site": {"name": "Test"}})
+        assert "site.name" in data.list_paths()
+
+        child = data.site
+        child["url"] = "example.com"
+
+        assert "site.url" in data.list_paths()
+
+    def test_delete_via_child_invalidates_parent(self):
+        data = NitroDataStore({"site": {"name": "Test", "url": "example.com"}})
+        assert "site.url" in data.list_paths()
+
+        child = data.site
+        del child["url"]
+
+        assert "site.url" not in data.list_paths()
